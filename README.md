@@ -1,2 +1,0 @@
-# Jadualnewsletter
-Jadual bualan
