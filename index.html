@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jadual Newsletter - Online</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .controls {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .control-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .control-group label {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .control-group select,
+    .control-group input {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .control-group button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+
+    .control-group button:hover {
+      background: #764ba2;
+    }
+
+    .control-group button.danger {
+      background: #e74c3c;
+    }
+
+    .control-group button.danger:hover {
+      background: #c0392b;
+    }
+
+    .status {
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 13px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      display: block;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      display: block;
+    }
+
+    .status.loading {
+      background: #d1ecf1;
+      color: #0c5460;
+      display: block;
+    }
+
+    .month-nav {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .month-nav button {
+      background: white;
+      border: 2px solid #667eea;
+      color: #667eea;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .month-nav button:hover {
+      background: #667eea;
+      color: white;
+    }
+
+    .month-display {
+      text-align: center;
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .calendar {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      margin-bottom: 30px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+      background: #ddd;
+    }
+
+    .day-header {
+      background: #667eea;
+      color: white;
+      padding: 12px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .day {
+      background: white;
+      min-height: 140px;
+      padding: 10px;
+      font-size: 12px;
+      position: relative;
+      border: 1px solid #ddd;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .day:hover {
+      background: #f0f0f0;
+      box-shadow: inset 0 0 5px rgba(102, 126, 234, 0.2);
+    }
+
+    .day.other-month {
+      background: #f9f9f9;
+      color: #aaa;
+    }
+
+    .day.today {
+      background: #fffacd;
+      border: 2px solid #ffd700;
+    }
+
+    .day-number {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    .day.other-month .day-number {
+      color: #aaa;
+    }
+
+    .task-item {
+      background: #e3f2fd;
+      border-left: 3px solid #667eea;
+      padding: 6px;
+      margin: 4px 0;
+      font-size: 11px;
+      line-height: 1.4;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .task-item:hover {
+      background: #bbdefb;
+      transform: translateX(2px);
+    }
+
+    .task-item strong {
+      color: #1976d2;
+      display: block;
+    }
+
+    .task-item .person {
+      color: #555;
+    }
+
+    .holiday {
+      background: #ffebee;
+      color: #c62828;
+      padding: 3px 5px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: bold;
+      margin: 3px 0;
+      display: block;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+      background: white;
+      margin: 5% auto;
+      padding: 25px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    }
+
+    .modal-header {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    .modal-body {
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #333;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-family: inherit;
+      font-size: 14px;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .modal-footer button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+
+    .modal-footer .btn-save {
+      background: #667eea;
+      color: white;
+    }
+
+    .modal-footer .btn-save:hover {
+      background: #764ba2;
+    }
+
+    .modal-footer .btn-cancel {
+      background: #ddd;
+      color: #333;
+    }
+
+    .modal-footer .btn-cancel:hover {
+      background: #ccc;
+    }
+
+    .modal-footer .btn-delete {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .modal-footer .btn-delete:hover {
+      background: #c0392b;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .legend {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .legend-title {
+      font-weight: bold;
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+
+    .legend-color {
+      width: 30px;
+      height: 30px;
+      border-radius: 3px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: repeat(7, 1fr);
+        gap: 1px;
+      }
+
+      .day {
+        min-height: 100px;
+        font-size: 11px;
+        padding: 5px;
+      }
+
+      .day-number {
+        font-size: 14px;
+      }
+
+      .modal-content {
+        width: 95%;
+        margin: 20% auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>📅 Jadual Newsletter Online</h1>
+    <p>Real-time scheduling system dengan Firestore</p>
+  </div>
+
+  <div class="controls">
+    <div class="control-group">
+      <label>Cloud Sync:</label>
+      <button onclick="syncToFirestore()">☁️ Upload ke Cloud</button>
+      <button onclick="syncFromFirestore()">⬇️ Load dari Cloud</button>
+      <button class="danger" onclick="clearAll()">🗑️ Clear All</button>
+    </div>
+
+    <div class="control-group">
+      <label>Local File:</label>
+      <input type="file" id="jsonUpload" accept=".json">
+      <button onclick="importFromFile()">📤 Import</button>
+      <button onclick="downloadSchedule()">📥 Download</button>
+    </div>
+
+    <div id="status" class="status"></div>
+  </div>
+
+  <div class="month-nav">
+    <button onclick="previousMonth()">← Sebelumnya</button>
+    <div class="month-display" id="monthDisplay"></div>
+    <button onclick="nextMonth()">Seterusnya →</button>
+  </div>
+
+  <div class="calendar">
+    <div class="grid">
+      <div class="day-header">Ahad</div>
+      <div class="day-header">Isnin</div>
+      <div class="day-header">Selasa</div>
+      <div class="day-header">Rabu</div>
+      <div class="day-header">Khamis</div>
+      <div class="day-header">Jumaat</div>
+      <div class="day-header">Sabtu</div>
+
+      <div id="calendar-grid"></div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-title">Keterangan</div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: #fffacd; border: 2px solid #ffd700;"></div>
+      <span>Hari ini</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: #e3f2fd; border-left: 3px solid #667eea;"></div>
+      <span>Task/Jadual</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: #ffebee;"></div>
+      <span>Hari Cuti/Perayaan</span>
+    </div>
+  </div>
+</div>
+
+<!-- Modal untuk edit task -->
+<div id="taskModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header" id="modalTitle"></div>
+    <div class="modal-body">
+      <div id="tasksList"></div>
+      <hr style="margin: 15px 0;">
+      <h4 style="margin-bottom: 10px;">Tambah Task Baru:</h4>
+      <div class="form-group">
+        <label>Jenis Task:</label>
+        <input type="text" id="taskType" placeholder="e.g., HTML, PDF, JE Task, Pic">
+      </div>
+      <div class="form-group">
+        <label>Nama Orang:</label>
+        <input type="text" id="taskPerson" placeholder="Nama yang bertanggungjawab">
+      </div>
+      <div class="form-group">
+        <label>Catatan (optional):</label>
+        <textarea id="taskNote" placeholder="Catatan tambahan"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Tutup</button>
+      <button class="btn-save" onclick="saveTask()">+ Tambah Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"></script>
+
+<script>
+  // Firebase Config - ACTUAL CONFIG
+  const firebaseConfig = {
+    apiKey: "AIzaSyD-36S-r9M0G0uRkyvsg4v1tYenzsECqfk",
+    authDomain: "jadual-newsletter.firebaseapp.com",
+    projectId: "jadual-newsletter",
+    storageBucket: "jadual-newsletter.firebasestorage.app",
+    messagingSenderId: "572402558126",
+    appId: "1:572402558126:web:e32d32396de0c7c0d3f93f"
+  };
+
+  // Initialize Firebase
+  let db;
+  try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    console.log("✅ Firebase initialized successfully");
+  } catch (e) {
+    console.error("❌ Firebase init error:", e);
+    showStatus("⚠️ Firebase tidak boleh connect. Gunakan local storage sahaja.", "error");
+  }
+
+  // Data management
+  let currentMonth = new Date().getMonth();
+  let currentYear = new Date().getFullYear();
+  let scheduleData = {};
+  let currentModalDate = null;
+
+  const monthNames = [
+    "Januari", "Februari", "Mac", "April", "Mei", "Jun",
+    "Julai", "Ogos", "September", "Oktober", "November", "Desember"
+  ];
+
+  const dayNames = ["Ahad", "Isnin", "Selasa", "Rabu", "Khamis", "Jumaat", "Sabtu"];
+
+  // Holidays Malaysia 2026
+  const holidays2026 = {
+    "1-1": "Tahun Baru",
+    "1-29": "Thaipusam",
+    "2-1": "Awal Muharram",
+    "2-14": "Hari Valentine",
+    "2-24": "Hari Wilayah",
+    "3-1": "Maulidur Rasul",
+    "4-10": "Hari Raya Aidilfitri",
+    "4-11": "Hari Raya Aidilfitri",
+    "4-12": "Hari Raya Aidilfitri",
+    "5-1": "Hari Buruh",
+    "5-22": "Wesak",
+    "6-3": "Agong Dipertuan Agong",
+    "7-7": "Awal Muharram",
+    "8-31": "Hari Kemerdekaan",
+    "9-16": "Malaysia Day",
+    "10-24": "Deepavali",
+    "10-31": "Halloween",
+    "12-25": "Hari Krismas"
+  };
+
+  // Initialize
+  window.onload = function() {
+    loadFromLocalStorage();
+    renderCalendar();
+    updateMonthDisplay();
+  };
+
+  function updateMonthDisplay() {
+    document.getElementById("monthDisplay").textContent = 
+      `${monthNames[currentMonth]} ${currentYear}`;
+  }
+
+  function renderCalendar() {
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    const lastDay = new Date(currentYear, currentMonth + 1, 0);
+    const prevLastDay = new Date(currentYear, currentMonth, 0);
+    
+    const firstDayOfWeek = firstDay.getDay();
+    const lastDayDate = lastDay.getDate();
+    const prevLastDayDate = prevLastDay.getDate();
+
+    let html = '';
+
+    // Previous month's days
+    for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+      html += `<div class="day other-month"><div class="day-number">${prevLastDayDate - i}</div></div>`;
+    }
+
+    // Current month's days
+    for (let day = 1; day <= lastDayDate; day++) {
+      const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const isToday = dateKey === getTodayDateKey();
+      const dayClass = isToday ? 'day today' : 'day';
+
+      html += `<div class="${dayClass}" onclick="openDayModal('${dateKey}')">
+        <div class="day-number">${day}</div>
+        <div id="tasks-${dateKey}"></div>
+      </div>`;
+    }
+
+    // Next month's days
+    const totalCells = Math.ceil((firstDayOfWeek + lastDayDate) / 7) * 7;
+    const nextDays = totalCells - firstDayOfWeek - lastDayDate;
+    for (let day = 1; day <= nextDays; day++) {
+      html += `<div class="day other-month"><div class="day-number">${day}</div></div>`;
+    }
+
+    document.getElementById("calendar-grid").innerHTML = html;
+    renderTasks();
+  }
+
+  function renderTasks() {
+    for (const dateKey in scheduleData) {
+      const tasks = scheduleData[dateKey];
+      const container = document.getElementById(`tasks-${dateKey}`);
+      
+      if (container && tasks && tasks.length > 0) {
+        let taskHtml = '';
+        tasks.forEach(task => {
+          taskHtml += `<div class="task-item">
+            <strong>${task.type}</strong>
+            <span class="person">${task.person}</span>
+          </div>`;
+        });
+        container.innerHTML = taskHtml;
+      }
+    }
+
+    // Add holidays
+    for (const holidayDate in holidays2026) {
+      const dateParts = holidayDate.split('-');
+      if (dateParts[0] == (currentMonth + 1)) {
+        const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(dateParts[1]).padStart(2, '0')}`;
+        const container = document.getElementById(`tasks-${dateKey}`);
+        if (container) {
+          container.innerHTML += `<span class="holiday">${holidays2026[holidayDate]}</span>`;
+        }
+      }
+    }
+  }
+
+  function previousMonth() {
+    currentMonth--;
+    if (currentMonth < 0) {
+      currentMonth = 11;
+      currentYear--;
+    }
+    updateMonthDisplay();
+    renderCalendar();
+  }
+
+  function nextMonth() {
+    currentMonth++;
+    if (currentMonth > 11) {
+      currentMonth = 0;
+      currentYear++;
+    }
+    updateMonthDisplay();
+    renderCalendar();
+  }
+
+  function getTodayDateKey() {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  }
+
+  function showStatus(message, type = "success") {
+    const statusEl = document.getElementById("status");
+    statusEl.textContent = message;
+    statusEl.className = `status ${type}`;
+    
+    if (type !== "loading") {
+      setTimeout(() => {
+        statusEl.className = "status";
+      }, 3000);
+    }
+  }
+
+  function loadFromLocalStorage() {
+    const saved = localStorage.getItem("newsletterSchedule");
+    if (saved) {
+      try {
+        scheduleData = JSON.parse(saved);
+      } catch (e) {
+        console.error("Error parsing saved data:", e);
+        scheduleData = {};
+      }
+    }
+  }
+
+  function saveToLocalStorage() {
+    localStorage.setItem("newsletterSchedule", JSON.stringify(scheduleData));
+  }
+
+  function openDayModal(dateKey) {
+    currentModalDate = dateKey;
+    const [year, month, day] = dateKey.split('-');
+    document.getElementById("modalTitle").textContent = `Jadual - ${day}/${month}/${year}`;
+    
+    // Display existing tasks
+    const tasks = scheduleData[dateKey] || [];
+    let tasksList = '';
+    
+    if (tasks.length > 0) {
+      tasksList = '<div style="margin-bottom: 15px;"><strong>Task Sedia Ada:</strong>';
+      tasks.forEach((task, index) => {
+        tasksList += `<div style="background: #f5f5f5; padding: 8px; margin: 5px 0; border-radius: 3px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <strong>${task.type}</strong> - ${task.person}
+            ${task.note ? `<br><small>${task.note}</small>` : ''}
+          </div>
+          <button onclick="deleteTask(${index})" style="background: #e74c3c; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 12px;">Delete</button>
+        </div>`;
+      });
+      tasksList += '</div>';
+    }
+    
+    document.getElementById("tasksList").innerHTML = tasksList;
+    
+    // Clear input fields
+    document.getElementById("taskType").value = '';
+    document.getElementById("taskPerson").value = '';
+    document.getElementById("taskNote").value = '';
+    
+    document.getElementById("taskModal").style.display = "block";
+  }
+
+  function closeModal() {
+    document.getElementById("taskModal").style.display = "none";
+    currentModalDate = null;
+  }
+
+  function saveTask() {
+    if (!currentModalDate) return;
+    
+    const type = document.getElementById("taskType").value.trim();
+    const person = document.getElementById("taskPerson").value.trim();
+    const note = document.getElementById("taskNote").value.trim();
+    
+    if (!type || !person) {
+      showStatus("❌ Jenis task dan nama orang harus diisi", "error");
+      return;
+    }
+    
+    if (!scheduleData[currentModalDate]) {
+      scheduleData[currentModalDate] = [];
+    }
+    
+    scheduleData[currentModalDate].push({
+      type,
+      person,
+      note,
+      createdAt: new Date().toISOString()
+    });
+    
+    saveToLocalStorage();
+    renderCalendar();
+    
+    // Clear inputs
+    document.getElementById("taskType").value = '';
+    document.getElementById("taskPerson").value = '';
+    document.getElementById("taskNote").value = '';
+    
+    showStatus("✅ Task ditambah!", "success");
+    
+    // Refresh modal
+    openDayModal(currentModalDate);
+  }
+
+  function deleteTask(index) {
+    if (!currentModalDate) return;
+    
+    if (confirm("Yakin nak delete?")) {
+      scheduleData[currentModalDate].splice(index, 1);
+      
+      if (scheduleData[currentModalDate].length === 0) {
+        delete scheduleData[currentModalDate];
+      }
+      
+      saveToLocalStorage();
+      renderCalendar();
+      openDayModal(currentModalDate);
+      showStatus("✅ Task deleted", "success");
+    }
+  }
+
+  function downloadSchedule() {
+    const dataStr = JSON.stringify(scheduleData, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `schedule-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showStatus("✅ Schedule downloaded", "success");
+  }
+
+  function importFromFile() {
+    document.getElementById("jsonUpload").click();
+  }
+
+  document.getElementById("jsonUpload").addEventListener("change", function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      try {
+        const data = JSON.parse(event.target.result);
+        scheduleData = data;
+        saveToLocalStorage();
+        renderCalendar();
+        showStatus("✅ File imported successfully", "success");
+      } catch (err) {
+        showStatus("❌ Error importing file", "error");
+        console.error(err);
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  function clearAll() {
+    if (confirm("🚨 Yakin nak delete SEMUA data? Tak boleh undo!")) {
+      scheduleData = {};
+      saveToLocalStorage();
+      renderCalendar();
+      closeModal();
+      showStatus("🔄 Semua data telah dihapus", "success");
+    }
+  }
+
+  async function syncToFirestore() {
+    if (!db) {
+      showStatus("❌ Firebase tidak connected", "error");
+      return;
+    }
+
+    showStatus("⏳ Uploading to cloud...", "loading");
+    try {
+      await db.collection("schedules").doc("main-2026").set({
+        data: scheduleData,
+        lastUpdated: new Date(),
+        updatedBy: "web-app"
+      });
+      showStatus("✅ Data uploaded to Firestore successfully", "success");
+    } catch (err) {
+      showStatus("❌ Error uploading to Firestore: " + err.message, "error");
+      console.error(err);
+    }
+  }
+
+  async function syncFromFirestore() {
+    if (!db) {
+      showStatus("❌ Firebase tidak connected", "error");
+      return;
+    }
+
+    showStatus("⏳ Loading from cloud...", "loading");
+    try {
+      const doc = await db.collection("schedules").doc("main-2026").get();
+      if (doc.exists) {
+        scheduleData = doc.data().data || {};
+        saveToLocalStorage();
+        renderCalendar();
+        showStatus("✅ Data loaded from Firestore successfully", "success");
+      } else {
+        showStatus("⚠️ No data found in Firestore", "error");
+      }
+    } catch (err) {
+      showStatus("❌ Error loading from Firestore: " + err.message, "error");
+      console.error(err);
+    }
+  }
+</script>
+
+</body>
+</html>
